@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Профиль {{user.username}}</title>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx" crossorigin="anonymous">
+
+</head>
+<body>
+	<ul class="nav">
+          <li class="nav-item">
+            <a class="nav-link active" href="{% url 'blog:index' %}">Главная</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="{% url 'blog:post-list' %}">Лента постов</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="{% url 'blog:create_post' %}">Создать пост</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="{%url 'blog:all_channels'%}">Каналы других пользователей</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="{% url 'blog:my_chanel' %}">Мои каналы</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="{% url 'blog:create_chanel' %}">Создать канал</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="{% url 'blog:find_user' %}">Поиск пользователей</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="{% url 'blog:profile' user.id%}?check_subs=yes">Подписки</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="{% url 'blog:profile' user.id%}">Профиль</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="{% url 'blog:logout' %}">Выйти</a>
+          </li>
+        </ul>
+    <div class="container">
+    	<h2>
+    		{{user.username}}
+    	</h2>
+      <p>
+        ID: {{ user.id}}
+      </p>
+
+      <p>
+        |Администрируемы каналлы|
+      </p>
+      <p>
+        {% for work in adm_ch %}
+          <a href="{% url 'blog:admin_channels' work.channel.id %}">{{ work.channel.name }}</a>
+        {% endfor %}
+      </p>
+      <p>
+        |-----------------------|
+      </p>
+
+      <a href="{% url 'blog:profile' user.id%}?check_subs=yes">Подписки</a><br>
+
+    	{% if user.first_name and user.last_name and request.GET.all_data == 'False' or not request.GET.all_data %}
+    		<a href="{% url 'blog:profile' user.id%}?all_data=True">Подробная информация</a>
+  		{% endif %}  		
+
+    	{% if request.GET.all_data != 'True' and not user.first_name and not last_name and profile.user.id == user.id%}
+    		<br><br>
+			<a href="{% url 'blog:create_profile' %}">Заполнить информацию</a>
+    	{% endif %}
+
+    	{% if request.GET.all_data == 'True' %}
+    		email: {{user.email}}<br>
+    		Name: {{user.first_name}}
+    		{{user.last_name}}<br>
+    		BIO: {{user.profile.bio}}<br>
+    		Age: {{user.profile.age}}<br>
+    		City: {{user.profile.city}}<br>
+        Channels: {% for ch in user.chanel_set.all %}
+                    {%if forloop.last %} 
+                      <a href="{% url 'blog:view_channel' ch.id %}">{{ch.name}}</a> 
+                    {% else %} 
+                      <a href="{% url 'blog:view_channel' ch.id %}">{{ch.name}}, </a> 
+                    {% endif %}
+                  {% endfor %}  
+                  {% if profile.user.id == user.id %}
+                  <a href="{% url 'blog:create_chanel' %}">Создать канал</a><br><br>
+                  {% endif %}
+        {% if profile.user.id == user.id %}
+    		<a href="{%url 'blog:change_profile'%}">Изменить профиль</a><br><br>
+        {% endif %}
+        <br>
+    		<a href="{%url 'blog:profile' user.id%}?all_data=False">Скрыть</a>
+    	{% endif %}
+    
+      {%if request.GET.check_subs == 'yes'%}
+      <br><a href="{% url 'blog:profile' user.id%}">Скрыть подписки</a>
+        {% for sub in user.subscriber_set.all %}
+          <div class="card">
+              <div class="card-body">
+                <h4 class="card-title">{{sub.chanel.name}}</h4>
+                <p class="card-text">{{sub.chanel.description}}...</p>
+                <a href="{% url 'blog:view_channel' sub.chanel.id %}">Открыть</a>
+              </div>
+          </div>
+        {% endfor %}
+      {%endif%}
+    </div>
+</body>
+</html>

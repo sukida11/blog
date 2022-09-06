@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Просмотр канала.</title>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx" crossorigin="anonymous">
+
+</head>
+<body>
+
+	<ul class="nav">
+          <li class="nav-item">
+            <a class="nav-link active" href="{% url 'blog:index' %}">Главная</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="{% url 'blog:post-list' %}">Лента постов</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="{% url 'blog:create_post' %}">Создать пост</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="{%url 'blog:all_channels'%}">Каналы других пользователей</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="{% url 'blog:my_chanel' %}">Мои каналы</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="{% url 'blog:create_chanel' %}">Создать канал</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="{% url 'blog:find_user' %}">Поиск пользователей</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="{% url 'blog:profile' user.id%}?check_subs=yes">Подписки</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="{% url 'blog:profile' user.id%}">Профиль</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="{% url 'blog:logout' %}">Выйти</a>
+          </li>
+        </ul>
+    <div class="container">
+		<div class="jumbotron">
+		
+		  <h1 class="display-3">{{channel.name}}</h1>
+		  <p class="lead">{{ channel.description }}</p>
+		  <p class="lead">Владелец: {{channel.owner.username}}</p>
+		  <hr class="my-2">
+		  <p>
+		  	Дата регистрации: {{channel.reg_date}}
+		  </p>
+		  <p>
+		  	Администрация:
+		  	{% for worker in channel.userroot_set.all%}
+		  		{% if forloop.last %} 
+		  			{% if worker.worker.username == user.username %}
+		  				Вы
+		  			{%else%}
+		  				{{worker.worker.username}}
+		  			{%endif%}
+		  		{%else%}
+		  			{% if worker.worker.username == user.username %}
+		  				Вы,
+		  			{%else%}
+		  				{{worker.worker.username}},
+		  			{%endif%}
+		  		{%endif%}
+		  	{%endfor%}
+		  </p>
+		  <p>
+		  	Подписчики: {{count_sub}}
+		  </p>
+		  </p>
+		   <p class="lead">
+		{%if user.id == channel.owner.id%}
+			    <a class="btn btn-primary btn-lg" href="{% url 'blog:create_post' %}" role="button">Новый пост</a>
+			    <a class="btn btn-primary btn-lg" href="{% url 'blog:add_admin' channel.id%}" role="button">Добавить администратора</a>
+			    <a class="btn btn-primary btn-lg" href="{% url 'blog:admin_channels' channel.id%}?change_data=yes" role="button">Изменить данные о канале</a>
+			    <a class="btn btn-primary btn-lg" href="{% url 'blog:delete_chanel' channel.id %}" role="button">Удалить канал</a>
+			  </p>
+		{% elif adm_ch.worker.id == user.id and adm_ch.roots == 'Суперпользователь' %}
+				<a class="btn btn-primary btn-lg" href="{% url 'blog:create_post' %}" role="button">Новый пост</a>
+				<a class="btn btn-primary btn-lg" href="{% url 'blog:admin_channels' channel.id%}?change_data=yes" role="button">Изменить данные о канале</a>
+		{% elif  adm_ch.worker.id == user.id and adm_ch.roots == 'Редактор' %}
+			<a class="btn btn-primary btn-lg" href="{% url 'blog:create_post' %}" role="button">Новый пост</a>
+		{% endif %}
+		{% if channel.owner.id == user.id %}
+		<div class="container">
+			<p>
+				Вы владелец этого канала.
+			</p>
+		</div>
+		{% elif usr_sub %}
+		<div class="container">
+			<p>
+				Вы подписаны.
+			</p>
+			<form method="post">
+				{% csrf_token %}
+				<input type="submit" name="unsub" class="btn btn-outline-warning" value="Отписаться">
+			</form>
+
+		</div>
+		{% else %}
+		<div class="container">
+			<form method="post">
+				{% csrf_token %}
+				<input type="submit" name="sub" class="btn btn-outline-success" value="Подписаться">
+			</form>
+		</div>
+		{%endif%}
+			  <a href="{% url 'blog:my_chanel' %}">Назад</a><br><br>
+			  <a href="{% url 'blog:admin_channels' channel.id%}?show_posts=yes">Показать публикации</a>
+			{%if request.GET.change_data == 'yes'%}
+				<div class="container">
+					<form method="post">
+						{% csrf_token %}
+						<p>Используйте только те поля, которые вам требуются</p>
+						<input type="text" name="name" class="form-control" placeholder="Изменить название канала"><br>
+						<textarea class="form-control" name="description" placeholder="Изменить описание канала"></textarea><br><br>
+						<input type="submit" name="" value="Отправить изменения" class="btn btn-outline-success">
+					</form>
+					<a href="{% url 'blog:admin_channels' channel.id%}">Отмена</a>
+				</div>
+			{%endif%}
+
+			{% if request.GET.show_posts == 'yes' %}
+				<a href="{% url 'blog:admin_channels' channel.id%}?show_posts=no">Скрыть публикации</a>
+				{%if channel.post_set.all%}
+					{% for post in channel.post_set.all %}
+							<div class="card">
+		            <div class="card-body">
+		              <h4 class="card-title">{{post.title}}</h4>
+		              <p class="card-text">{{post.text|slice:'50'}}...</p>
+		              <a href="{% url 'blog:check_post' post.id %}">Читать</a>
+		              {% if post.channel.owner.id == user.id or adm_ch.worker.id == user.id and post.author.id == user.id or adm_ch.roots == 'Суперпользователь' or adm_ch.roots == 'Редактор'%}
+            				<a href="{% url 'blog:change_post' post.id%}">Редактировать</a>
+    							{% endif %}
+		            </div>
+		          </div>
+					{% endfor %}
+
+				{%endif%}
+			{% endif %}
+
+			
+		
+		</div>
+	</div>
+</body>
+</html>

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>
+		Лента постов
+	</title>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx" crossorigin="anonymous">
+</head>
+<body>
+	<ul class="nav">
+          <li class="nav-item">
+            <a class="nav-link active" href="{% url 'blog:index' %}">Главная</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="{% url 'blog:post-list' %}">Лента постов</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="{% url 'blog:create_post' %}">Создать пост</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="{%url 'blog:all_channels'%}">Каналы других пользователей</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="{% url 'blog:my_chanel' %}">Мои каналы</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="{% url 'blog:create_chanel' %}">Создать канал</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="{% url 'blog:find_user' %}">Поиск пользователей</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="{% url 'blog:profile' user.id%}?check_subs=yes">Подписки</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="{% url 'blog:profile' user.id%}">Профиль</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="{% url 'blog:logout' %}">Выйти</a>
+          </li>
+        </ul>
+    
+    <div class="container">
+
+    	<form method="get" action="">
+	    	<input type="text" name="name_find" class="form-control" placeholder="Введите имя искомой публикации">
+	    	<input type="submit" value="Найти" class='btn btn-outline-success'  name="">
+	    	<input type="submit" name="reset" value='Очистить поиск' class="btn btn-warning">
+	    </form>
+	    <br><br><br>
+
+    	<div class="card-deck" style="margin-top: 30px;">
+    	{% for post in posts %}
+		  <div class="card">
+		    <div class="card-body">
+		      <h4 class="card-title"><a href="{% url 'blog:check_post' post.id %}">{{post.title}}</a></h4>
+		      <p class="card-text">{{post.text|slice:'50'}}...</p>
+		      <p>{{post.author.username}}</p>
+		      <p>{{post.date_pub}}</p>
+		      {% if post.channel.owner.id == user.id %}
+		      	<a href="{% url 'blog:change_post' post.id%}">Редактировать</a>
+		      {% endif %}
+		    
+		    </div>
+		  </div>
+		{% endfor %}
+		</div>
+		<div class="pagination">
+		    <span class="step-links">
+		        {% if page_obj.has_previous %}
+		            <a href="?page=1&name_find=">&laquo; first</a>
+		            <a href="?page={{ page_obj.previous_page_number }}&name_find=">previous</a>
+		        {% endif %}
+
+		        <span class="current">
+		            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+		        </span>
+
+		        {% if page_obj.has_next %}
+		            <a href="?page={{ page_obj.next_page_number }}&name_find=">next</a>
+		            <a href="?page={{ page_obj.paginator.num_pages }}&name_find=">last &raquo;</a>
+		        {% endif %}
+		    </span>
+		</div>
+    </div>
+
+</body>
+</html>

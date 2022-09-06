@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title></title>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx" crossorigin="anonymous">
+</head>
+<body>
+	<ul class="nav">
+          <li class="nav-item">
+            <a class="nav-link active" href="{% url 'blog:index' %}">Главная</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="{% url 'blog:post-list' %}">Лента постов</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="{% url 'blog:create_post' %}">Создать пост</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="{%url 'blog:all_channels'%}">Каналы других пользователей</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="{% url 'blog:my_chanel' %}">Мои каналы</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="{% url 'blog:create_chanel' %}">Создать канал</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="{% url 'blog:find_user' %}">Поиск пользователей</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="{% url 'blog:profile' user.id%}?check_subs=yes">Подписки</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="{% url 'blog:profile' user.id%}">Профиль</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="{% url 'blog:logout' %}">Выйти</a>
+          </li>
+        </ul>
+
+
+    <div class="container">
+    	<h1>
+    		{{post.title}}
+    	</h1>
+    	<hr>
+    	<p>
+    		{{post.text}}
+    	</p>
+    	<hr>
+    	<p>
+    		Автор: {{post.author.username}}
+    	</p>
+    	<h5>Канал: <a href="{% url 'blog:view_channel' post.channel.id %}?show_posts=yes">{{post.channel.name}}</a></h5>
+      <h5>Лайки: {{likes_count_all}}</h5>
+      </h5>
+      <a href="{% url 'blog:view_channel' post.channel.id %}?show_posts=yes">Открыть канал</a><br>
+      {% for root in roots %}
+        {% if post.channel.owner.id == user.id or root.worker.id == user.id and root.roots == 'Суперпользователь' or adm_ch.roots == 'Редактор' %}
+            <a href="{% url 'blog:change_post' post.id%}">Редактировать</a>
+        {% endif %}
+      {% endfor %}
+      {% if user.is_authenticated %}
+
+            {% if not user_liking%}
+              <form method="post">
+                {%csrf_token%}
+                <input type="submit" name="like" value="Лайкнуть" class="btn btn-warning">
+              </form>
+            {% elif user_liking.user.id == user.id and user_liking.post.id == post.id%}
+              <div class="container">
+                Вы уже оставили свой лайк
+              </div>
+              
+            {% endif %}
+          
+            <h5><a href="{% url 'blog:view_channel' post.channel.id %}?show_posts=yes">Перейти на канал</a></h5>
+
+          <hr><hr>
+        <form method="post">
+          {%csrf_token%}
+          <input type="text" name="comment_text" class="form-control" placeholder="Оставьте свой комментарий.">
+          <input type="submit" name="" value="Оставить" class="btn btn-outline-success">
+        </form>
+          {%if post.comment_set %}
+            {% for comment in post.comment_set.all %}
+              <hr>
+              
+                
+                {% if request.GET.reply_for_comment_id == comment.id|slugify %}
+                  <div class="container">
+                  <p>
+                    {{comment.comment_text}} от {{comment.author.username}}
+                    <p>{{comment.date}}</p>
+                  </p>
+                  <form method="post">
+                    {% csrf_token %}
+                    <input type="text" name="reply_text" class="form-control" style="width:200px;" placeholder="Ответ">
+                    <input type="submit" name="" class="btn btn-outline-success">
+                  </form>
+                  </div>
+                {% else %}
+                  <div class="container">
+                  <p>
+                    {{comment.comment_text}} | от {{comment.author.username}}
+                    <p>{{comment.date}}</p>
+                    {% if comment.commentreply_set%}
+                      {% for reply in comment.commentreply_set.all %}
+                        <div class="container">
+                          <p>
+                            {{reply.reply_text}} | от {{reply.author.username}} кому {{reply.comment_to_reply.author.username}}
+                            <p style="font-size: 12px;">{{reply.date}}</p>
+                          </p>
+                        </div>
+                      {% endfor %}
+                    {%endif%}
+                  </p>
+                  <a href="{% url 'blog:check_post' post.id%}?reply_for_comment_id={{comment.id}}">Ответить</a>
+                  </div>
+                {% endif %}
+              
+              <hr>
+            {% endfor %}
+
+          {%else%}
+            <p>Пока нет ни одного комментария</p>
+          {%endif%}
+      {% else %}
+        <p>Авторизуйтесь чтобы оставлять комментарии.</p>
+      {% endif %}
+    </div>
+
+    
+
+</body>
+</html>
