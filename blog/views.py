@@ -183,12 +183,6 @@ class ChannelView(LoginRequiredMixin, DetailView):
             user_id=self.request.user
         ).first()
 
-        context['adm_ch'] = UserRoot.objects.filter(
-            worker_id=self.request.user.id
-        ).filter(
-            channel_id=self.kwargs['pk']
-        ).all()
-
         context['count_sub'] = len(Subscriber.objects.filter(
             chanel_id = self.kwargs['pk']
         ).all())
