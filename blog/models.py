@@ -6,13 +6,14 @@ from django.utils import timezone
 # Create your models here.
 class Profile(models.Model):
 	user = models.OneToOneField(User, on_delete=models.CASCADE)
+	picture = models.ImageField(null=True, blank=True, upload_to='blog/profile')
 	reg_date = models.DateTimeField(default=timezone.now())
 	bio = models.TextField()
 	age = models.IntegerField()
 	city = models.CharField(max_length=200)
 
 	def __str__(self):
-		return self.username
+		return self.user.username
 
 
 class Chanel(models.Model):

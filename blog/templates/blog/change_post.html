@@ -1,62 +1,24 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>
-		Изменение публикации	
-	</title>
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx" crossorigin="anonymous">
-</head>
-<body>
-	<ul class="nav">
-          <li class="nav-item">
-            <a class="nav-link active" href="{% url 'blog:index' %}">Главная</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link active" href="{% url 'blog:post-list' %}">Лента постов</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link active" href="{% url 'blog:create_post' %}">Создать пост</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link active" href="{%url 'blog:all_channels'%}">Каналы других пользователей</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link active" href="{% url 'blog:my_chanel' %}">Мои каналы</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link active" href="{% url 'blog:create_chanel' %}">Создать канал</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link active" href="{% url 'blog:find_user' %}">Поиск пользователей</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link active" href="{% url 'blog:profile' user.id%}?check_subs=yes">Подписки</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link active" href="{% url 'blog:profile' user.id%}">Профиль</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link active" href="{% url 'blog:logout' %}">Выйти</a>
-          </li>
-        </ul>
-    <div class='container'>
-    	{% for root in roots %}
-    		{% if post.channel.owner.id == user.id or root.worker.id == user.id and root.roots == 'Суперпользователь' or adm_ch.roots == 'Редактор' %}
-		    	<h1>Изменение данных поста.</h1>
-		    	<hr>
-		    	<h1>
-		    		{{post.title}}
-		    	</h1>
-		    	<hr>
-		    	<p>
-		    		{{post.text}}
-		    	</p>
-		    	<hr>
-		    	<h3>
-		    		Автор: {{post.author.username}}
-		    	</h3><br><br><hr>
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class='container'>
+    {% for root in roots %}
+    	{% if post.channel.owner.id == user.id or root.worker.id == user.id and root.roots == 'Суперпользователь' or adm_ch.roots == 'Редактор' %}
+		    <h1>Изменение данных поста.</h1>
+		    <hr>
+		    <h1>
+		    	{{post.title}}
+		    </h1>
+		    <hr>
+		    <p>
+		    	{{post.text}}
+		    </p>
+		    <hr>
+		    <h3>
+		    	Автор: {{post.author.username}}
+		    </h3>
+		    <br><br>
+		    <hr>
 				<form method="post" action="">
 					{% csrf_token %}
 					<input type="text" name="title" class="form-control" placeholder="Название">
@@ -71,5 +33,4 @@
 				{%endif%}
 			{% endfor %}
 	</div>
-</body>
-</html>
+{% endblock content %}

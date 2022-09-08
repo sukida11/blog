@@ -51,6 +51,7 @@ class ProfileView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data()
+        context['profile'] = User.objects.get(pk=self.kwargs['pk']).profile
         context['adm_ch'] = UserRoot.objects.filter(
             worker_id=self.kwargs['pk']
         ).all()
@@ -213,7 +214,7 @@ class CreatePostView(LoginRequiredMixin,TemplateView):
     def post(self, request):
         # print(request.POST['channel'])
         u = User.objects.get(pk=request.user.id)
-        channel = Chanel.objects.filter(name=request.POST['channel'])[0]
+        channel = Chanel.objects.filter(name=request.POST['channel']).first()
 
         if request.POST:
             if request.POST['title'] and request.POST['text']:
